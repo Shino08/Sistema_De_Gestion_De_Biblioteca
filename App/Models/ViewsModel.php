@@ -7,7 +7,25 @@
         # Metodo para obtener las vistas desde la URL  colocando por defecto el login o el 404 si la ruta no existe en el directorio #
         
         protected function getViewModel($view){
-            $routes = ["dashboard","createSystemDb","libraryReports","userManagement", "managementAuthors", "managementBooks", "manageLoans", "logOut", "userUpdate"];
+            $routes = [
+                "dashboard",
+                "createSystemDb",
+                "libraryReports",
+                "userManagement",
+                "userCreate",
+                "userEdit",
+                "managementAuthors",
+                "authorCreate",
+                "authorEdit",
+                "managementBooks",
+                "bookCreate",
+                "bookEdit",
+                "manageLoans",
+                "loanCreate",
+                "loanReturn",
+                "logOut",
+                "userUpdate"
+            ];
 
             if (in_array($view, $routes)) {
 

@@ -39,7 +39,6 @@ if (isset($_GET['views'])) {
         require_once $view;
     }
 
-    require_once "./App/Views/Inc/script.php"; 
     ?>
 </body>
 </html>

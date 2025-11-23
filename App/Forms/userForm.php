@@ -10,14 +10,14 @@ if (isset($_POST['userModule'])) {
     $userNew = new UserController();
     
     if($_POST['userModule'] == "register") {
-       echo $userNew->RegisterUserController();
+       $userNew->RegisterUserController();
        
     }
     if($_POST['userModule'] == "delete") {
-       echo $userNew->DeleteUserController();
+       $userNew->DeleteUserController();
     }
     if($_POST['userModule'] == "update") {
-       echo $userNew->UpdateUserController();
+       $userNew->UpdateUserController();
     }
     
 } else {
