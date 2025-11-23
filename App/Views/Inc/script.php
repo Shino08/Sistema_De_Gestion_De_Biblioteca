@@ -1,1 +1,0 @@
-<!-- Scripts removed - system now uses only backend logic -->

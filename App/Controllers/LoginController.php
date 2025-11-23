@@ -10,50 +10,42 @@ class LoginController extends MainModel {
      
         #Almacenar datos del formulario#
 
-        $email = $this->CleanData($_POST['email']);
+        $loginInput = $this->CleanData($_POST['email']); // Puede ser email o username
         $password = $this->CleanData($_POST['password']);
 
         #Verifiacando campos obligatorios#
 
-        if ($email == '' || $password == '') {
+        if ($loginInput == '' || $password == '') {
             echo "<p style='color:red;'>Error: Faltan datos por ingresar</p>";
             return;
         }
 
-        # Verificando integridad de los datos #
+        # Verificando usuario (por email o username) #
 
-        if ($this->VerifyData("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", $email)) {
-            echo "<p style='color:red;'>Error: El email no es válido</p>";
-            return;
-        }
+        $checkUser = $this->ExecuteQuery("SELECT * FROM users WHERE email='$loginInput' OR username='$loginInput'");
 
-        if ($this->VerifyData("[a-zA-Z0-9$@.-]{7,100}", $password)) {
-            echo "<p style='color:red;'>Error: La contraseña debe tener al menos 7 caracteres</p>";
-            return;
-        }
-        
-        # Verificando email #
+        if ($checkUser->rowCount() == 1) {
 
-        $check_email = $this->ExecuteQuery("SELECT * FROM administrators WHERE email='$email'");
+            $user = $checkUser->fetch();
 
-        if ($check_email->rowCount() == 1) {
+            // Verificar contraseña
+            if (password_verify($password, $user['password'])) {
 
-            $check_email = $check_email->fetch();
-
-            if ($check_email['email'] == $email) {
-
-                $_SESSION['id'] = $check_email['admin_id'];
-                $_SESSION['email'] = $check_email['email'];                            
+                $_SESSION['id'] = $user['id'];
+                $_SESSION['name'] = $user['name'];
+                $_SESSION['email'] = $user['email'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
                 
                 header("Location: ".APP_URL."dashboard/");
                 exit();
                 
             } else {
-                echo "<p style='color:red;'>Error: Email o contraseña incorrectos</p>";
+                echo "<p style='color:red;'>Error: Usuario o contraseña incorrectos</p>";
             }
             
         } else {
-            echo "<p style='color:red;'>Error: Email o contraseña incorrectos</p>";
+            echo "<p style='color:red;'>Error: Usuario o contraseña incorrectos</p>";
         }
 
     }

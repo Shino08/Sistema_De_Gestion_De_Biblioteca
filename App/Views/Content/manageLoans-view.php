@@ -1,6 +1,36 @@
+<?php
+    use App\Controllers\LoanController;
+
+    $loanController = new LoanController();
+    $alert = "";
+
+    // Handle form submissions
+    if (isset($_POST['book_id']) && isset($_POST['user_id'])) {
+        $alert = $loanController->RegisterLoanController();
+    }
+
+    if (isset($_POST['return_book'])) {
+        $alert = $loanController->ReturnBookController();
+    }
+
+    if (isset($_POST['renew_loan'])) {
+        $alert = $loanController->RenewLoanController();
+    }
+
+    // Get available books and users for the form
+    $availableBooks = $loanController->GetAvailableBooks();
+    $allUsers = $loanController->GetAllUsers();
+?>
+
     <section class="section">
         <div class="container">
             
+            <?php if ($alert != ""): ?>
+                <div class="mb-4">
+                    <?= $alert ?>
+                </div>
+            <?php endif; ?>
+
             <div class="level">
                 <div class="level-left">
                     <div class="level-item">
@@ -23,102 +53,27 @@
             </div>
 
             <div class="box">
-                <div class="field is-grouped">
-                    <p class="control is-expanded">
-                        <input class="input" type="text" placeholder="Buscar por usuario o libro...">
-                    </p>
-                    <p class="control">
-                        <button class="button is-danger">
-                            🔍 Buscar
-                        </button>
-                    </p>
-                </div>
+                <form method="GET">
+                    <input type="hidden" name="views" value="manageLoans">
+                    <div class="field is-grouped">
+                        <p class="control is-expanded">
+                            <input class="input" type="text" name="search" placeholder="Buscar por usuario o libro..." value="<?= isset($_GET['search']) ? $_GET['search'] : '' ?>">
+                        </p>
+                        <p class="control">
+                            <button class="button is-danger" type="submit">
+                                🔍 Buscar
+                            </button>
+                        </p>
+                    </div>
+                </form>
             </div>
 
             <div class="box">
-                <div class="table-container">
-                    <table class="table is-fullwidth is-striped is-hoverable">
-                        <thead>
-                            <tr class="has-background-danger-light">
-                                <th>ID</th>
-                                <th>Libro</th>
-                                <th>Usuario</th>
-                                <th>Fecha Préstamo</th>
-                                <th>Fecha Devolución</th>
-                                <th>Estado</th>
-                                <th class="has-text-centered">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td><strong>Cien Años de Soledad</strong></td>
-                                <td>Juan Pérez</td>
-                                <td>10/11/2025</td>
-                                <td>24/11/2025</td>
-                                <td><span class="tag is-success">Activo</span></td>
-                                <td class="has-text-centered">
-                                    <div class="buttons is-centered">
-                                        <button class="button is-small is-success">
-                                            <span class="icon is-small">
-                                                <i class="fas fa-check"></i>
-                                            </span>
-                                            <span>Devolver</span>
-                                        </button>
-                                        <button class="button is-small is-info">
-                                            <span class="icon is-small">
-                                                <i class="fas fa-clock"></i>
-                                            </span>
-                                            <span>Renovar</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><strong>La Casa de los Espíritus</strong></td>
-                                <td>María González</td>
-                                <td>01/11/2025</td>
-                                <td>15/11/2025</td>
-                                <td><span class="tag is-danger">Vencido</span></td>
-                                <td class="has-text-centered">
-                                    <div class="buttons is-centered">
-                                        <button class="button is-small is-success">
-                                            <span class="icon is-small">
-                                                <i class="fas fa-check"></i>
-                                            </span>
-                                            <span>Devolver</span>
-                                        </button>
-                                        <button class="button is-small is-warning">
-                                            <span class="icon is-small">
-                                                <i class="fas fa-exclamation"></i>
-                                            </span>
-                                            <span>Notificar</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td><strong>Don Quijote</strong></td>
-                                <td>Carlos Ruiz</td>
-                                <td>05/11/2025</td>
-                                <td>08/11/2025</td>
-                                <td><span class="tag is-light">Devuelto</span></td>
-                                <td class="has-text-centered">
-                                    <div class="buttons is-centered">
-                                        <button class="button is-small is-info">
-                                            <span class="icon is-small">
-                                                <i class="fas fa-eye"></i>
-                                            </span>
-                                            <span>Ver Detalle</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <?php
+                    $page = isset($_GET['page']) ? $_GET['page'] : 1;
+                    $search = isset($_GET['search']) ? $_GET['search'] : "";
+                    echo $loanController->LoanListController($page, 10, "index.php?views=manageLoans&page=", $search);
+                ?>
             </div>
 
         </div>
@@ -133,16 +88,17 @@
                 <button class="delete" aria-label="close" onclick="document.getElementById('modalAgregar').classList.remove('is-active')"></button>
             </header>
             <section class="modal-card-body">
-                <form action="crear_prestamo.php" method="POST">
+                <form method="POST">
                     
                     <div class="field">
                         <label class="label">Usuario</label>
                         <div class="control">
                             <div class="select is-fullwidth">
-                                <select name="id_usuario" required>
+                                <select name="user_id" required>
                                     <option value="">Seleccione un usuario</option>
-                                    <option value="1">Juan Pérez - juan.perez@email.com</option>
-                                    <option value="2">María González - maria.gonzalez@email.com</option>
+                                    <?php foreach ($allUsers as $user): ?>
+                                        <option value="<?= $user['id'] ?>"><?= $user['name'] ?> - <?= $user['email'] ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
@@ -152,10 +108,13 @@
                         <label class="label">Libro</label>
                         <div class="control">
                             <div class="select is-fullwidth">
-                                <select name="id_libro" required>
+                                <select name="book_id" required>
                                     <option value="">Seleccione un libro</option>
-                                    <option value="1">Cien Años de Soledad (5 disponibles)</option>
-                                    <option value="2" disabled>La Casa de los Espíritus (0 disponibles)</option>
+                                    <?php foreach ($availableBooks as $book): ?>
+                                        <option value="<?= $book['id'] ?>">
+                                            <?= $book['title'] ?> - <?= $book['author_name'] ?> (<?= $book['available_quantity'] ?> disponibles)
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
@@ -166,7 +125,7 @@
                             <div class="field">
                                 <label class="label">Fecha de Préstamo</label>
                                 <div class="control">
-                                    <input class="input" type="date" name="fecha_prestamo" required>
+                                    <input class="input" type="date" name="loan_date" value="<?= date('Y-m-d') ?>" required>
                                 </div>
                             </div>
                         </div>
@@ -174,7 +133,7 @@
                             <div class="field">
                                 <label class="label">Fecha de Devolución</label>
                                 <div class="control">
-                                    <input class="input" type="date" name="fecha_devolucion_esperada" required>
+                                    <input class="input" type="date" name="expected_return_date" value="<?= date('Y-m-d', strtotime('+14 days')) ?>" required>
                                 </div>
                             </div>
                         </div>
@@ -209,5 +168,3 @@
         </div>
     </div>
 
-</body>
-</html>
